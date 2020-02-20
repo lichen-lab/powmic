@@ -306,11 +306,8 @@ estSigma<-function(x,method=c('MAGMA','CCLasso','SparCC','SPIECEASI','CCREPE'),d
 
 
 
-<<<<<<< HEAD
-=======
 
 
->>>>>>> Initial commit
 fit.NB<-function(x){
   x0=as.data.frame(x)
   x0=as.matrix(x0)
@@ -318,13 +315,6 @@ fit.NB<-function(x){
   sfs=apply(x0,1,mean); sfs=sfs/median(sfs)
   params=matrix(NA,notu,ncol=2)
   colnames(params)=c('mu','phi')
-<<<<<<< HEAD
-  for (i in 1:notu) {
-    if(sum(x0[,i])>2){
-      fit=try(glm.nb(x0[,i]~1+offset(log(sfs))))
-      if(methods::is(fit,"try-error")) {
-        fit=try(glm(x0[,i]~1+offset(log(sfs)),family = poisson))
-=======
   fits=list()
   for (i in 1:notu) {
     if(sum(x0[,i])>2){
@@ -332,7 +322,6 @@ fit.NB<-function(x){
       fits[[i]]=fit
       if(methods::is(fit,"try-error")) {
         fit=try(glm(x0[,i]~1+offset(log(sfs)),family = poisson),silent=T)
->>>>>>> Initial commit
         mu=exp(coef(fit))
         params[i,]=c(mu,0)
       }else{
@@ -346,19 +335,11 @@ fit.NB<-function(x){
       params[i,]=c(mu,0)
     }
   }
-<<<<<<< HEAD
-  list(otu.mat=x0,mu=params[,'mu'],phi=params[,'phi'])
-}
-
-
-
-=======
   list(mu=params[,'mu'],phi=params[,'phi'],fits=fits)
   
 }
 
 
->>>>>>> Initial commit
 fit.ZINB<-function(x){
   x0=as.data.frame(x)
   x0=as.matrix(x0)
@@ -366,20 +347,14 @@ fit.ZINB<-function(x){
   sfs=apply(x0,1,mean); sfs=sfs/median(sfs)
   params=matrix(NA,notu,ncol=3)
   colnames(params)=c('mu','phi','p0')
-<<<<<<< HEAD
-=======
   fits=list()
->>>>>>> Initial commit
   for (i in 1:notu) {
     if(sum(x0[,i])>5){
       ctrl=pscl::zeroinfl.control(method = "L-BFGS-B")
       ctrl$reltol=NULL
       ctrl$factr=1e-3/.Machine$double.eps
       fit=try(pscl::zeroinfl(x0[,i]~1+offset(log(sfs))|1, dist = "negbin", link = "logit" , control=ctrl), silent=T)
-<<<<<<< HEAD
-=======
       fits[[i]]=fit
->>>>>>> Initial commit
       if(methods::is(fit,"try-error")) {
         fit=try(glm.nb(x0[,i]~1+offset(log(sfs))))
         phi=1/fit$theta
@@ -398,11 +373,7 @@ fit.ZINB<-function(x){
       params[i,]=c(mu,phi,0)
     }
   }
-<<<<<<< HEAD
-  list(otu.mat=x0,mu=params[,'mu'],phi=params[,'phi'],p0=params[,'p0'])
-=======
   list(mu=params[,'mu'],phi=params[,'phi'],p0=params[,'p0'],fits=fits)
->>>>>>> Initial commit
 }
 
 
@@ -414,22 +385,16 @@ fit.ZIP<-function(x){
   sfs=apply(x0,1,mean); sfs=sfs/median(sfs)
   params=matrix(NA,notu,ncol=2)
   colnames(params)=c('mu','p0')
-<<<<<<< HEAD
-=======
   logliks=aics=rep(NA,notu)
   fits=list()
   
->>>>>>> Initial commit
   for (i in 1:notu) {
     if(sum(x0[,i])>5){
       ctrl =pscl::zeroinfl.control(method = "L-BFGS-B")
       ctrl$reltol= NULL
       ctrl$factr=1e-3/.Machine$double.eps
       fit=try(pscl::zeroinfl(x0[,i]~1+offset(log(sfs))|1, dist = "poisson", link = "logit" , control=ctrl), silent=T)
-<<<<<<< HEAD
-=======
       fits[[i]]=fit
->>>>>>> Initial commit
       if(methods::is(fit,"try-error")) {
         fit=try(glm(x0[,i]~1+offset(log(sfs)),family = quasipoisson))
         mu=exp(coef(fit))
@@ -445,35 +410,21 @@ fit.ZIP<-function(x){
       params[i,]=c(mu,0)
     }
   }
-<<<<<<< HEAD
-  list(otu.mat=x0,mu=params[,'mu'],p0=params[,'p0'])
-}
-
-
-
-=======
   list(mu=params[,'mu'],p0=params[,'p0'],fits=fits)
 }
 
 
->>>>>>> Initial commit
 fit.DM<-function(x){
   params=list()
   res=dirmult(x)
   params$mu0=res$pi
   params$phi0=res$theta
-<<<<<<< HEAD
-=======
   #params$otu.mat=x
->>>>>>> Initial commit
   params
 }
 
 
-<<<<<<< HEAD
-=======
 
->>>>>>> Initial commit
 estParams<-function(x,Sigma=NULL,method=c('MAGMA','CCLasso','SparCC','SPIECEASI','CCREPE'),distrib=c('NB','ZINB','ZIP','DM')){
   distrib=match.arg(distrib)
   method=match.arg(method)
@@ -488,15 +439,6 @@ estParams<-function(x,Sigma=NULL,method=c('MAGMA','CCLasso','SparCC','SPIECEASI'
   params$p0=out$p0
   params
 }
-
-
-
-
-
-
-
-
-
 
 
 
