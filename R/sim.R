@@ -33,17 +33,10 @@ simCounts.NB<-function(sim.params, n1, n2){
   lmu0=sim.params$lmu0
   lphi0=sim.params$lphi0
   lfc.mu=sim.params$lfc.mu
-<<<<<<< HEAD
-  Sigma=sim.params$Sigma
-  depth=sim.params$depth
-  nTaxa=sim.params$nTaxa
-  lfc.mu1 = lfc.mu2= rep(0, nTaxa)
-=======
   nlfc.mu=length(unique(lfc.mu))
   Sigma=sim.params$Sigma
   depth=sim.params$depth
   nTaxa=sim.params$nTaxa
->>>>>>> Initial commit
   p.DA=sim.params$p.DA
   nDA=round(nTaxa*p.DA)
   lfc.mu1 = lfc.mu2= numeric(nTaxa)
@@ -58,10 +51,6 @@ simCounts.NB<-function(sim.params, n1, n2){
     DAid = sample(nTaxa,nDA)
     DAid1=sample(DAid,length(DAid)/2)
     DAid2=setdiff(DAid,DAid1)
-<<<<<<< HEAD
-    lfc.mu1[DAid1] = rep(lfc.mu,length(DAid1))
-    lfc.mu2[DAid2] = rep(lfc.mu,length(DAid2))
-=======
     if(nlfc.mu==1){
      lfc.mu1[DAid1] = rep(lfc.mu,length(DAid1))
      lfc.mu2[DAid2] = rep(lfc.mu,length(DAid2))
@@ -70,7 +59,6 @@ simCounts.NB<-function(sim.params, n1, n2){
       lfc.mu2[DAid2] =sample(lfc.mu,length(DAid2),replace=T)
     }
    
->>>>>>> Initial commit
   # }else if(comp=='yes'){
   #   #DAid = sample(nTaxa,nDA)
   #   #lfc.mu2[DAid] = rep(lfc.mu,nDA)
@@ -138,17 +126,10 @@ simCounts.ZIP<-function(sim.params, n1, n2){
   lmu0=sim.params$lmu0
   lp0=sim.params$lp0
   lfc.mu=sim.params$lfc.mu
-<<<<<<< HEAD
-  Sigma=sim.params$Sigma
-  depth=sim.params$depth
-  nTaxa=sim.params$nTaxa
-  lfc.mu1 = lfc.mu2= rep(0, nTaxa)
-=======
   nlfc.mu=length(unique(lfc.mu))
   Sigma=sim.params$Sigma
   depth=sim.params$depth
   nTaxa=sim.params$nTaxa
->>>>>>> Initial commit
   p.DA=sim.params$p.DA
   nDA=round(nTaxa*p.DA)
   lfc.mu1 = lfc.mu2= numeric(nTaxa)
@@ -164,10 +145,6 @@ simCounts.ZIP<-function(sim.params, n1, n2){
     DAid = sample(nTaxa,nDA)
     DAid1=sample(DAid,length(DAid)/2)
     DAid2=setdiff(DAid,DAid1)
-<<<<<<< HEAD
-    lfc.mu1[DAid1] = rep(lfc.mu,length(DAid1))
-    lfc.mu2[DAid2] = rep(lfc.mu,length(DAid2))
-=======
     if(nlfc.mu==1){
      lfc.mu1[DAid1] = rep(lfc.mu,length(DAid1))
      lfc.mu2[DAid2] = rep(lfc.mu,length(DAid2))
@@ -175,7 +152,6 @@ simCounts.ZIP<-function(sim.params, n1, n2){
      lfc.mu1[DAid1] = sample(lfc.mu,length(DAid1),replace=T)
      lfc.mu2[DAid2] = sample(lfc.mu,length(DAid2),replace=T)
     }
->>>>>>> Initial commit
   # }else if(comp=='yes'){
   #   #DAid = sample(nTaxa,nDA)
   #   #lfc.mu2[DAid] = rep(lfc.mu,nDA)
@@ -245,17 +221,10 @@ simCounts.ZINB<-function(sim.params, n1, n2){
   lphi0=sim.params$lphi0
   lp0=sim.params$lp0
   lfc.mu=sim.params$lfc.mu
-<<<<<<< HEAD
-  Sigma=sim.params$Sigma
-  depth=sim.params$depth
-  nTaxa=sim.params$nTaxa
-  lfc.mu1 = lfc.mu2= rep(0, nTaxa)
-=======
   nlfc.mu=length(lfc.mu)
   Sigma=sim.params$Sigma
   depth=sim.params$depth
   nTaxa=sim.params$nTaxa
->>>>>>> Initial commit
   p.DA=sim.params$p.DA
   nDA=round(nTaxa*p.DA)
   lfc.mu1 = lfc.mu2= numeric(nTaxa)
@@ -272,10 +241,6 @@ simCounts.ZINB<-function(sim.params, n1, n2){
     DAid = sample(nTaxa,nDA)
     DAid1=sample(DAid,length(DAid)/2)
     DAid2=setdiff(DAid,DAid1)
-<<<<<<< HEAD
-    lfc.mu1[DAid1] = rep(lfc.mu,length(DAid1))
-    lfc.mu2[DAid2] = rep(lfc.mu,length(DAid2))
-=======
     if(nlfc.mu==1){
      lfc.mu1[DAid1] = rep(lfc.mu,length(DAid1))
      lfc.mu2[DAid2] = rep(lfc.mu,length(DAid2))
@@ -283,7 +248,6 @@ simCounts.ZINB<-function(sim.params, n1, n2){
      lfc.mu1[DAid1] = sample(lfc.mu,length(DAid1),replace=T)
       lfc.mu2[DAid2] =sample(lfc.mu,length(DAid2),replace=T)
     }
->>>>>>> Initial commit
   # }else if(comp=='yes'){
   #   #DAid = sample(nTaxa,nDA)
   #   #lfc.mu2[DAid] = rep(lfc.mu,nDA)
@@ -341,12 +305,8 @@ simCounts.DM<-function(sim.params, n1, n2){
   p.DA = sim.params$p.DA
   nDA=round(nTaxa*p.DA)
   lfc.mu=sim.params$lfc.mu
-<<<<<<< HEAD
-  lfc.mu1 = lfc.mu2= rep(0, nTaxa)
-=======
   nlfc.mu=length(lfc.mu)
   lfc.mu1 = lfc.mu2= numeric(nTaxa)
->>>>>>> Initial commit
   mu0=exp(sim.params$lmu0)
   mu0=mu0/sum(mu0)
   phi0=exp(sim.params$lphi0)
@@ -357,10 +317,6 @@ simCounts.DM<-function(sim.params, n1, n2){
     DAid = sample(nTaxa,nDA)
     DAid1=sample(DAid,length(DAid)/2)
     DAid2=setdiff(DAid,DAid1)
-<<<<<<< HEAD
-    lfc.mu1[DAid1] = rep(lfc.mu,length(DAid1))
-    lfc.mu2[DAid2] = rep(lfc.mu,length(DAid2))
-=======
     if(nlfc.mu==1){
      lfc.mu1[DAid1] = rep(lfc.mu,length(DAid1))
      lfc.mu2[DAid2] = rep(lfc.mu,length(DAid2))
@@ -368,7 +324,6 @@ simCounts.DM<-function(sim.params, n1, n2){
      lfc.mu1[DAid1] = sample(lfc.mu,length(DAid1),replace=T)
       lfc.mu2[DAid2] =sample(lfc.mu,length(DAid2),replace=T)
     }
->>>>>>> Initial commit
   # }else if(comp=='yes'){
   #   #DAid = sample(nTaxa,nDA)
   #   #lfc.mu2[DAid] = rep(lfc.mu,nDA)
@@ -400,14 +355,5 @@ simCounts.DM<-function(sim.params, n1, n2){
   list(counts=x, designs=designs, DAid=DAid, sim.params=sim.params)
   
 }
-
-
-
-
-
-
-
-
-
 
 
