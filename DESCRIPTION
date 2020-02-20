@@ -2,21 +2,12 @@ Package: powmic
 Type: Package
 Title: powmic: an R package for power assessment in microbiome case-control 
 Version: 1.0.0
-<<<<<<< HEAD
-Date: 2019-11-01
-=======
-Date: 2020-02-14
->>>>>>> Initial commit
+Date: 2020-02-20
 Author: Li Chen
 Maintainer: Li Chen <chen61@iu.edu>
 Description: Sample size calculation and power assessment are essential to optimize the design of metagenomic sequencing experiments especially in a case-control study to identify differentially abundant microbes. Due to the complex data characteristics of microbiome data including excessive zeros, over-dispersion, compositional effects, microbial correlations and variable sequencing depths, the analytical form for power analysis is usually unavailable. Thus, we develop a novel prospective real-data based simulation strategy and R package powmic for sample size calculation and power assessment while considering these data characteristics.
 License: GPL-2
-<<<<<<< HEAD
-Depends: ggplot2, gridExtra, grid, lattice, reshape2, edgeR, DESeq2, MASS, dirmult
-=======
 Depends: ggplot2, gridExtra, lattice, reshape2, edgeR, DESeq2, MASS, dirmult, biomformat, nonnest2
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
->>>>>>> Initial commit
 NeedsCompilation: yes
-
