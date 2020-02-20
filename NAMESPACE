@@ -1,7 +1,2 @@
 export(estParams,estSigma,setParams.NB,setParams.ZINB,setParams.ZIP,setParams.DM,
-<<<<<<< HEAD
-powmic,assess,summaryAssess,plotStrata,plotStrataAll)
-=======
 powmic,assess,summaryAssess,plotStrata,plotStrataAll,modelselect.AIC,modelselect.vuong)
->>>>>>> Initial commit
-
