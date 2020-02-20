@@ -20,14 +20,17 @@ modelselect.AIC<-function(x){
     }
   }
   
-  AIC.NB[is.na(AIC.NB)]=10000
-  AIC.ZINB[is.na(AIC.ZINB)]=10000
-  AIC.ZIP[is.na(AIC.ZIP)]=10000
+  AIC.NB[is.na(AIC.NB)]=Inf
+  AIC.ZINB[is.na(AIC.ZINB)]=Inf
+  AIC.ZIP[is.na(AIC.ZIP)]=Inf
   
   
   AICS=cbind(AIC.NB,AIC.ZINB,AIC.ZIP); colnames(AICS)=c('NB','ZINB','ZIP')
   tops=apply(AICS,1,which.min)
-  percentage=table(tops)/sum(table(tops))
+  percentage=numeric(3)
+  tmp=table(tops)/sum(table(tops))
+  id=as.numeric(names(tmp))
+  percentage[id]=tmp
   
   df=data.frame(method=c('NB','ZINB','ZIP'),percentage=percentage)
   p=ggplot(df, aes(x=method, y=percentage, fill=method)) +
