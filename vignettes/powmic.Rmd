@@ -1,0 +1,229 @@
+---
+title: "User manual of **powmic**"
+author: "Li Chen"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{User manual of **powmic**}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+bibliography: powmic.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Abstract
+
+Power analysis is essential to decide the sample size of metagenomic sequencing experiments in a case-control study for identifying differentially abundant microbes. However, the complexity of microbiome data characteristics such as excessive zeros, over-dispersion, compositional effect, intrinsically microbial correlations and variable sequencing depths makes the power analysis particularly challenging as the analytical form is usually unavailable. Here, we develop a simulation-based strategy and R package **powmic** to estimate the empirical statistical power while considering the complexity of data characteristics. Finally, a real data example demonstrates the usage of **powmic**. The R package **powmic** is available at <https://github.com/lichen-lab/powmic>.
+
+
+## Preparations for dependent software packages
+
+1. Install R packages for infeerring microbial correlation network
+```{r block1, echo=TRUE,eval=FALSE}
+#MAGMA
+library(devtools)
+install_gitlab("arcgl/rmagma")
+library(rMAGMA)
+
+#CCREPE
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("ccrepe")
+
+#SpiecEasi
+library(devtools)
+install_github("zdk123/SpiecEasi")
+```
+
+2. Install other dependent R packages
+```{r block2, echo=TRUE,eval=FALSE}
+BiocManager::install(c("biomformat","edgeR","DESeq2"))
+install.packages(c('ggplot2','gridExtra','lattice','reshape2','MASS','dirmult','nonnest2'))
+```
+
+2. Install **powmic**
+```{r block3, echo=TRUE,eval=FALSE}
+install.packages("devtools")
+library(devtools)
+install_github("lichen-lab/powmic")
+```
+
+## Overview of **powmic**
+
+
+![Workflow of **powmic**](powmic-flowchart.jpg){width=75%}
+
+
+
+
+## Estimation module
+
+### Choose real dataset to estimate parameters
+
+* The real dataset is chosen to match the study to be conducted as much as possible. Similar study, which will match the prospective study, can be located from large-scale public database such as qiita <https://qiita.ucsd.edu/>, which integrates processed data of multiple studies using QIIME [@QIIME]. Users can download biom file consisting OTU table and sample information consisting metadata for the matched study. Importantly, qiita includes large-scale microbiome projects such as Human Microbiome Project (HMP) <https://qiita.ucsd.edu/study/description/1928>, American Gut Project (AGP) <https://qiita.ucsd.edu/study/description/2639> and Earth Microbiome Project (EMP) <https://qiita.ucsd.edu/emp/study/list/>. Specifically, the Human Microbiome Project (HMP) dataset provides extensive 16S rRNA marker gene data from the human microbiome sampled at 18 body sites. If human microbiome is of interest, it is a resource from parameters can be used to estimated baseline mean abundance, dispersion and microbial correlation. If evolutionary and ecological are of interest, EMP can provide the baseline parameters free-living (e.g. water, sediment, surface, soil, hypersaline) and host-associated microbiome (e.g. animal and plant).
+
+* The matched real datasets can be obtained in most cases with the accumulated large-scale microbiome studies deposited into qiita. If the exactly matched cannot be obtained. We use approximate dataset. For example, use the closest body site to the body site in study.
+
+
+### Choose data generation distribution
+
+**powmic** offers an interface to choose either multivariate or univariate data generative distributions, based on which parameters can be estimated from real datasets and synthetic datasets can be generated in the simulation.
+
+* Multivariate distribution
+DM assumes that underlying microbe proportions follow a multivariate Dirichlet distribution with a constant dispersion parameter. In other way, it allows the variability of sample-wise underlying microbe proportions. Thus, DM improves the fit for over-dispersed data compared to the multinomial distribution, which assumes that sample-wise underlying microbe proportions are the same.
+* Univariate distribution
+Different from DM, NB, ZINB and ZIP model each microbe individually with different sets of baseline parameters. Beside underlying mean abundance $\mu$, NB includes dispersion $\phi$ for over-dispersed data, while ZIP includes excessive zero probability $p$ for less-dispersed but zero-inflated data, and ZINB contains both $\phi$ and $p$ for over-dispersed and zero-inflated data.
+
+Generally, **powmic** will choose negative binomial distribution (NB) with consideration of microbial correlation as the default data generation distribution. If the dataset is highly sparse and over-dispersed, zero-inflated negative binomial distribution (ZINB) with consideration of microbial correlation is the choice. If dataset is highly sparse but less dispersed, zero-inflated Poisson distribution (ZIP) with consideration of microbial correlation is the choice. Specifically, we use two criteria to select the best data generation distribution for current study:
+
+* Akaike information criterion (AIC) AIC measures the trade-off between the goodness of fit of the model and the simplicity of the model. AIC is defined as 2$k$-2ln($\hat{L}$), where $k$ is the number of estimated parameters in the model and $\hat{L}$ is the maximum value of the likelihood function for the model.  Smaller AIC indicates a better statistical model.
+
+* Vuong closeness test is a likelihood-ratio-based test for model selection using the Kullback–Leibler information criterion [@vuongtest]. The test compares two models, which can be nested, non-nested or overlapping. For vuongtest function in nonnest2 R package <https://cran.r-project.org/web/packages/nonnest2/>, the usage of Vuong closeness test is vuongtest(Model1,Model2), where $H_{0}$: Model 2 fits as well as Model1; $H_{1}$: Model 1 fits better than Model2.
+
+We also provide Dirichlet multinomial distribution due to its popularity in microbiome study.
+
+
+### Choose parameters for data generation distribution
+
+#### Estimation of baseline parameters
+
+Based on the chosen data generative distribution, **powmic** can estimate underlying microbe proportions and dispersion parameter for the multivariate distribution or microbe-wise baseline parameters for the univariate distribution. Moreover, parameters such as proportion of DA taxa and effect size can also be obtained.
+
+#### Estimation of microbial correlations
+
+For univariate distributions, **powmic** provides an interface for correlation-based approaches and graph model-based approaches to estimate microbial correlations. Correlation-based approaches including CCREPE [@CCREPE], SparCC [@SparCC] and CCLasso [@CCLasso], essentially estimate pairwise correlations among microbes. Graphical model-based approaches include SPIEC-EASI [@SPIEC-EASI] and MAGMA [@MAGMA]. Unlike correlation-based approaches that estimate the empirical correlation or covariance matrix for compositional data directly, graphical model-based approaches seek to infer an underlying graphical model for compositional data using the conditional independence. By default, **powmic** uses MAGMA, a copula gaussian graphical model combined with GLM marginal distributions. MAGMA holds several advantages compared to other approaches. Compared to correlation-based approaches, it may reduce the possibility of spurious results. Compared to SPIEC-EASI, MAGMA considers the structure of microbiome data involving sparsity, over-dispersion and compositional effects.
+
+
+## Simulation module
+
+### Choose proportion of DA OTUs and effect size
+In principle, the proportion of DA OTUs is contingent upon on the prior knowledge and biologists. Similar to DE genes, we assume most taxa are unchanged. Thus, in default, we assume only 5% DA taxa between two groups. In addition, the effect size (log-fold change) and proportion of DA OTUs can be estimated from the matched real dataset (e.g. FDR<0.1) in the case-control design. The effect size can be a scalar or be sampled from the estimated effect size in the simulation.
+
+
+### Choose DA methods
+**powmic** provides an interface of both parametric and nonparametric DA methods. Parametric methods include NB-based edgeR [@edgeR], DESeq2 [@DESeq2] and metagenomeSeq [@metagenomeSeq], which is based on zero-inflated gaussian distribution. Nonparametric method is Wilcoxon rank-sum test, which is independent of any distribution assumption. Based on the model selection criteria, a DA method is chosen to match the data generation distribution. For example, edgeR is used when the underlying data generation distribution is NB. Another option is Wilcoxon rank-sum test, which is robust to underlying data generation distribution.
+
+### Data generation
+Simulation parameters such as number of microbes, proportion of DA microbes, and effect size (fold change) can be specified in **powmic**. Effect size is multiplied to $\mu$ to reflect the mean abundance change of DA microbes in case versus control or vice versa. To maintain the microbial correlations in the synthetic datasets, powmic employs the normal-copula functions to generate abundance of all microbes simultaneously. 
+
+
+### Power assessment
+Multiple synthetic datasets are simulated for a given sample size and power analysis is performed on each dataset. Given a nominal level of FDR, average power evaluation metrics such as True Positive Rate (TPR)  and False Discovery Rate (FDR) are calculated, which are defined as TPR (Power)=$\frac{TP}{TP+FN}$, FDR=$\frac{FP}{max(1, FP+TP)}$ respectively. Besides the  power analysis for all microbes, powmic provides the power analysis for microbes in each stratum, where microbes are stratified by the prevalence or abundance.
+
+
+## One real data example to demonstrate the workflow of **powmic**
+
+If gut microbiome are of interest, we download and process QIIME maps and BIOMs for COMBO dataset downloaded from qiita <https://qiita.ucsd.edu/study/description/1011>.
+
+```{r download, echo=TRUE,eval=TRUE,warning=FALSE,message=FALSE}
+# Process COMBO dataset
+library(powmic)
+Sys.setlocale('LC_ALL','C')
+data=read_biom('study_1011_012820-210610/processed_data/221_otu_table.biom')
+otu_table=as.data.frame(as.matrix(biom_data(data)))
+dim(otu_table)
+meta=read.table('1011_20171108-091205.txt',header=T,sep="\t",stringsAsFactors = F,quote=NULL, comment='')
+tread=colSums(otu_table)
+nonzeros=rowSums(otu_table!=0)
+otu.mat=otu_table[nonzeros>5,]
+dim(otu.mat)
+
+# DE analysis for obtaining proportion of DA otus and lfc between male and female
+id=match(colnames(otu.mat),meta$sample_name)
+sex=meta$sex[id]; table(sex)
+
+dat=list()
+dat$counts=otu.mat
+dat$designs=numeric(length(sex))
+dat$designs[which(sex=='female')]=1
+d=DGEList(counts=dat$counts, group=dat$designs)
+d=calcNormFactors(d)
+d=estimateCommonDisp(d)
+d=estimateTagwiseDisp(d)
+fit=exactTest(d)
+res=topTags(fit, n=nrow(dat$counts))
+res=as.data.frame(res)
+proportion=sum(res$FDR<0.1)/nrow(dat$counts)
+proportion
+lfc=res$logFC[res$FDR<0.1]
+hist(lfc)
+```
+
+There are 100 samples (56 female and 44 male) and 3393 OTUs. After removing OTUs with less than 5 non-zero entries across samples, we have 1379 OTUs for the downstream analysis. In a two-group design (female vs male), we use edgeR to obtain the proportion of DA OTUs and effect size (fold change). There are around 3\% DA OTUs (FDR<0.1) and the fold changes are shown in the figure below.
+
+We apply two model selection criteria to choose the data generation distribution. We start with AIC first.
+```{r AIC, echo=TRUE,eval=FALSE,warning=FALSE,message=FALSE}
+modelselect.AIC(t(otu.mat))
+```
+![AIC for model selection](AIC.png){width=65%}
+
+NB acheives 72.4\% smallest AIC for all OTUs, which indicates NB is the best data generation distribution based on AIC.
+
+**powmic** further compares NB, ZINB and ZIP using vuong test.
+
+```{r vuong, echo=TRUE,eval=FALSE,warning=FALSE,message=FALSE}
+modelselect.vuong(t(otu.mat))
+```
+![Vuong test for model selection](vuong.png){width=65%}
+
+Comparing NB and ZINB, NB is 62.2\% better than ZINB. Comparing NB and ZIP, NB is 40.2\% better than ZIP and ZIP is only 4.6\% better than NB. Overall, NB is the best data generation distribution based on both AIC and vuong test.
+
+**powmic** then estimates baseline parameters including microbial correlation structure, mean and dispersion for all OTUs. The estimation steps will be much longer if microbial correlation structure needs to be estimated.
+```{r estimation, echo=FALSE,eval=FALSE}
+library(rMAGMA)
+#fit NB
+params=list()
+Sigma=estSigma(x,method='MAGMA',distrib='NB') #option for estimating microbial correlation structure
+params$Sigma=Sigma
+out=fit.NB(x)
+params$otu.mat=out$otu.mat
+params$mu=out$mu
+params$phi=out$phi
+save(params,file='params2.rda')
+```
+
+
+We set 5\% DA OTUs and use all baseline parameters estimated from COMBO study.
+```{r simulation, echo=TRUE,eval=TRUE}
+#load('params2.rda')
+data(params2) #params has been built into the package
+lmu0=log(params$mu)
+lphi0=log(params$phi)
+Sigma=params$Sigma
+distrib='NB'
+lfc.mu=lfc
+params.sim=setParams.NB(nTaxa=1000,p.DA=0.05,Sigma=Sigma,lmu0=lmu0,lphi0=lphi0,lfc.mu=lfc)
+powmic.out=powmic(n1s=c(20,60), n2s=c(20,60),
+                  params=params.sim,distrib=distrib,DAmethod='wilcox',nsims = 2)
+```
+
+
+```{r assessment, echo=TRUE,eval=TRUE}
+assess.out = assess(powmic.out, alpha.type='fdr',alpha.level=0.1,stratify.type='prevalence')
+sum.out=summaryAssess(assess.out,assess.type='overall')
+```
+
+<!-- ```{r visualize, echo=TRUE,eval=FALSE,message=FALSE} -->
+<!-- p1 = plotStrata(assess.out, "power", stratify.by = 'prevalence',  -->
+<!--                 is.legend = F) -->
+<!-- p2 = plotStrata(assess.out, "fdr", stratify.by = 'prevalence',  -->
+<!--                 is.legend = F) -->
+<!-- grid.arrange(p1, p2, nrow = 1) -->
+<!-- ``` -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# References
