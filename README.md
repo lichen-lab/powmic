@@ -10,7 +10,6 @@ Li Chen <chen61@iu.edu>
 
 # Install R packages for infeerring microbial correlation network
 ```r
->>>>>>> Initial commit
 #MAGMA
 library(devtools)
 install_gitlab("arcgl/rmagma")
