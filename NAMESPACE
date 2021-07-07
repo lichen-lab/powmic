@@ -1,2 +1,2 @@
 export(estParams,estSigma,setParams.NB,setParams.ZINB,setParams.ZIP,setParams.DM,
-powmic,assess,summaryAssess,plotStrata,plotStrataAll,modelselect.AIC,modelselect.vuong)
+powmic,assess,summaryAssess,plotStrata,plotStrataAll,modelselect.AIC,modelselect.vuong,fit.NB,fit.ZINB,fit.ZIP,fit.DM)
